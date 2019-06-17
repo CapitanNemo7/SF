@@ -1,0 +1,56 @@
+public class Query {
+    public static void query() {
+        Child__c[] children = [SELECT Father__r.GrandFather__r.Name, Father__r.Name, Name FROM Child__c];
+		Father__c[] fathers = [SELECT Name, (SELECT Name from Children__r), GrandFather__r.Name FROM Father__c];
+        GrandFather grandFather;
+        Father father;
+        Child child;
+        /*      
+        for(Father__c p: fathers) {
+            //System.debug('grandparent name: ' + p.GrandParent__r.Name);
+            //System.debug('parent name: ' + p.Name);
+            for(Child__c c : p.Children__r) {
+                //System.debug('clildren name: ' + c.Name);
+            }  
+        }  */
+        for(Child__c c: children) {
+           grandFather = new GrandFather(c.Father__r.GrandFather__r);
+           father = new Father(c.Father__r);
+           child = new Child(c);
+        } 
+    }
+
+     public class GrandFather {
+        public String name;
+        public List<Father> fathers;
+        
+        public GrandFather(GrandFather__c name) {
+         this.name = name.Name;
+         List<Father__c> fathers = [SELECT Name, GrandFather__r.Name FROM Father__c ORDER BY Name];   
+        }     
+    }
+    
+    public class Father {
+        public String name;
+        public List<Child> children;
+        
+        public Father(Father__c f) {
+            this.name = f.Name;
+            List<Child__c> childList = [SELECT Name FROM Child__c ORDER BY Name];
+        }
+    }
+    
+    public class Child {
+        public String name;
+        List<Child__c> childList = [SELECT Name FROM Child__c ORDER BY Name];
+        public Child(Child__c ch) {
+            this.name = ch.Name;
+        }
+       
+        public void Print(){
+            for(Child__c c : childList){
+                System.debug('______\n' +c + '\n______');
+            }
+        }
+    }
+}
